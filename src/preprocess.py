@@ -28,3 +28,12 @@ def preprocess_data(df):
     df_scaled["Is_Laundering"] = labels
 
     return df_scaled, scaler
+
+# Data Balance
+
+def balance_data(df):
+    df = df.sample(frac=1)
+    fraud = df[df["Is_Laundering"] == 1]
+    non_fraud = df[df["Is_Laundering"] == 0][:len(fraud)]
+    balanced = pd.concat([fraud, non_fraud]).sample(frac=1, random_state=42)
+    return balanced
