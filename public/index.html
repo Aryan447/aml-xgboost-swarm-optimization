@@ -1,139 +1,644 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="light">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AML Detection System</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            900: '#0c4a6e',
+                        },
+                        dark: {
+                            bg: '#0f172a',
+                            card: '#1e293b',
+                            text: '#f1f5f9'
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'slide-down': 'slideDown 0.3s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        slideDown: {
+                            '0%': { opacity: '0', transform: 'translateY(-10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .main-card { max-width: 900px; margin: 50px auto; border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.1); border-radius: 12px; }
-        .card-header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; border-radius: 12px 12px 0 0 !important; padding: 20px; }
-        .form-label { font-weight: 600; color: #495057; font-size: 0.9rem; }
-        .form-control, .form-select { border-radius: 8px; padding: 10px; border: 1px solid #ced4da; }
-        .form-control:focus { border-color: #2a5298; box-shadow: 0 0 0 0.2rem rgba(42, 82, 152, 0.25); }
-        .btn-analyze { background-color: #2a5298; color: white; padding: 12px; font-weight: bold; border-radius: 8px; transition: all 0.3s; }
-        .btn-analyze:hover { background-color: #1e3c72; transform: translateY(-1px); }
-        .result-box { display: none; margin-top: 25px; padding: 20px; border-radius: 10px; animation: fadeIn 0.5s; }
-        .safe { background-color: #d1e7dd; border: 1px solid #badbcc; color: #0f5132; }
-        .danger { background-color: #f8d7da; border: 1px solid #f5c2c7; color: #842029; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        body {
+            background-size: 24px 24px;
+        }
+
+        .light-bg {
+            background-color: #f8fafc;
+            background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+        }
+
+        .dark-bg {
+            background-color: #0f172a;
+            background-image: radial-gradient(#1e293b 1px, transparent 1px);
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .dark .glass-panel {
+            background: rgba(30, 41, 59, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
     </style>
 </head>
-<body>
 
-<div class="card main-card">
-    <div class="card-header text-center">
-        <h3 class="mb-0">🛡️ AML Transaction Inspector</h3>
-        <p class="mb-0 opacity-75">AI-Powered Money Laundering Detection</p>
-    </div>
-    <div class="card-body p-4">
-        <form id="amlForm">
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label class="form-label">Timestamp (YYYY/MM/DD HH:MM)</label>
-                    <input type="text" class="form-control" name="Timestamp" value="2022/09/01 14:30" required>
+<body class="min-h-screen font-sans transition-colors duration-300 light-bg">
+
+    <!-- Navigation Bar -->
+    <nav class="fixed top-0 w-full z-50 glass-panel border-b border-gray-200 dark:border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center cursor-pointer" onclick="switchTab('home')">
+                    <span class="text-2xl mr-2">🛡️</span>
+                    <span class="font-bold text-xl text-slate-800 dark:text-white tracking-tight"
+                        data-i18n="appTitle">AML Inspector</span>
                 </div>
-                <div class="col-md-6">
-                    <label class="form-label">Payment Format</label>
-                    <select class="form-select" name="Payment Format">
-                        <option value="Wire">Wire Transfer</option>
-                        <option value="Bitcoin">Bitcoin / Crypto</option>
-                        <option value="Cash">Cash</option>
-                        <option value="Credit Card">Credit Card</option>
-                        <option value="Cheque">Cheque</option>
-                        <option value="ACH">ACH</option>
-                        <option value="Reinvestment">Reinvestment</option>
+
+                <!-- Desktop Nav -->
+                <div class="hidden md:flex space-x-8 items-center">
+                    <button onclick="switchTab('home')"
+                        class="nav-item text-brand-600 dark:text-brand-400 font-medium hover:text-brand-800 dark:hover:text-brand-300 transition-colors"
+                        data-i18n="navHome">Home</button>
+                    <button onclick="switchTab('about')"
+                        class="nav-item text-slate-500 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white transition-colors"
+                        data-i18n="navAbout">About</button>
+                    <button onclick="switchTab('contact')"
+                        class="nav-item text-slate-500 dark:text-slate-400 font-medium hover:text-slate-900 dark:hover:text-white transition-colors"
+                        data-i18n="navContact">Contact</button>
+                </div>
+
+                <!-- Controls & Mobile Menu Button -->
+                <div class="flex items-center space-x-4">
+                    <!-- Language Selector -->
+                    <select id="langSelect" onchange="changeLanguage(this.value)"
+                        class="bg-transparent text-sm font-medium text-slate-600 dark:text-slate-300 focus:outline-none cursor-pointer">
+                        <option value="en">🇺🇸 EN</option>
+                        <option value="hi">🇮🇳 HI</option>
                     </select>
-                </div>
 
-                <div class="col-md-6">
-                    <label class="form-label">Amount Paid</label>
-                    <div class="input-group">
-                        <span class="input-group-text">$</span>
-                        <input type="number" step="0.01" class="form-control" name="Amount Paid" value="15000.00" required>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Amount Received</label>
-                    <div class="input-group">
-                        <span class="input-group-text">$</span>
-                        <input type="number" step="0.01" class="form-control" name="Amount Received" value="15000.00" required>
-                    </div>
-                </div>
+                    <!-- Dark Mode Toggle -->
+                    <button onclick="toggleDarkMode()"
+                        class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-600 dark:text-yellow-400">
+                        <!-- Sun Icon -->
+                        <svg id="sunIcon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+                            </path>
+                        </svg>
+                        <!-- Moon Icon -->
+                        <svg id="moonIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
+                            </path>
+                        </svg>
+                    </button>
 
-                <div class="col-md-6">
-                    <label class="form-label">Source Bank ID</label>
-                    <input type="number" class="form-control" name="From Bank" value="105">
+                    <!-- Mobile Menu Button -->
+                    <button onclick="toggleMobileMenu()"
+                        class="md:hidden p-2 rounded-md text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
                 </div>
-                <div class="col-md-6">
-                    <label class="form-label">Dest Bank ID</label>
-                    <input type="number" class="form-control" name="To Bank" value="902">
+            </div>
+        </div>
+
+        <!-- Mobile Menu (Hidden by default) -->
+        <div id="mobile-menu"
+            class="hidden md:hidden glass-panel border-b border-gray-200 dark:border-gray-800 animate-slide-down">
+            <div class="px-4 pt-2 pb-4 space-y-1">
+                <button onclick="switchTab('home')"
+                    class="nav-item-mobile block w-full text-left px-3 py-2 rounded-md text-base font-medium text-brand-600 dark:text-brand-400 bg-slate-50 dark:bg-slate-800/50"
+                    data-i18n="navHome">Home</button>
+                <button onclick="switchTab('about')"
+                    class="nav-item-mobile block w-full text-left px-3 py-2 rounded-md text-base font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+                    data-i18n="navAbout">About</button>
+                <button onclick="switchTab('contact')"
+                    class="nav-item-mobile block w-full text-left px-3 py-2 rounded-md text-base font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+                    data-i18n="navContact">Contact</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-24 pb-12 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center min-h-screen">
+
+        <!-- HOME SECTION -->
+        <div id="home-section"
+            class="w-full max-w-3xl glass-panel rounded-3xl overflow-hidden animate-fade-in relative z-10 transition-all duration-300">
+            <!-- Header -->
+            <div
+                class="bg-gradient-to-r from-brand-900 to-brand-700 dark:from-brand-950 dark:to-brand-800 p-8 sm:p-10 text-center text-white relative overflow-hidden">
+                <div class="absolute inset-0 bg-white/10 opacity-50 backdrop-blur-3xl"></div>
+                <div class="relative z-10">
+                    <span
+                        class="inline-block p-3 bg-white/20 rounded-2xl backdrop-blur-sm mb-4 text-4xl shadow-xl">🛡️</span>
+                    <h1 class="text-2xl sm:text-4xl font-bold mb-2 tracking-tight text-white drop-shadow-sm"
+                        data-i18n="heroTitle">AML Transaction Inspector</h1>
+                    <p class="text-brand-100 font-medium text-base sm:text-lg opacity-90" data-i18n="heroSubtitle">
+                        AI-Powered Money Laundering Detection</p>
                 </div>
-
-                <input type="hidden" name="Account" value="X">
-                <input type="hidden" name="Account.1" value="Y">
-                <input type="hidden" name="Receiving Currency" value="USD">
-                <input type="hidden" name="Payment Currency" value="USD">
-
             </div>
 
-            <button type="submit" class="btn btn-analyze w-100 mt-4">Analyze Transaction Risk</button>
-        </form>
+            <!-- Body -->
+            <div class="p-6 sm:p-10">
+                <form id="amlForm" class="space-y-6 sm:space-y-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+                        <!-- Date Input -->
+                        <div class="space-y-2 group">
+                            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1"
+                                data-i18n="labelTimestamp">Timestamp</label>
+                            <input type="text" name="Timestamp" value="2022/09/01 14:30" required
+                                class="w-full px-5 py-4 rounded-xl border border-slate-200 dark:border-slate-700 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 dark:focus:ring-brand-500/20 outline-none transition-all duration-200 text-slate-800 dark:text-white bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 placeholder-slate-400 font-mono text-sm hover:border-slate-300 dark:hover:border-slate-600">
+                        </div>
 
-        <div id="result" class="result-box text-center">
+                        <!-- Payment Format -->
+                        <div class="space-y-2 group">
+                            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1"
+                                data-i18n="labelPaymentFormat">Payment Format</label>
+                            <div class="relative">
+                                <select name="Payment Format"
+                                    class="w-full px-5 py-4 rounded-xl border border-slate-200 dark:border-slate-700 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 dark:focus:ring-brand-500/20 outline-none transition-all duration-200 text-slate-800 dark:text-white bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 appearance-none cursor-pointer hover:border-slate-300 dark:hover:border-slate-600">
+                                    <option value="Wire" data-i18n="optWire">Wire Transfer</option>
+                                    <option value="Bitcoin" data-i18n="optBitcoin">Bitcoin / Crypto</option>
+                                    <option value="Cash" data-i18n="optCash">Cash</option>
+                                    <option value="Credit Card" data-i18n="optCredit">Credit Card</option>
+                                    <option value="Cheque" data-i18n="optCheque">Cheque</option>
+                                    <option value="ACH" data-i18n="optACH">ACH</option>
+                                    <option value="Reinvestment" data-i18n="optReinvest">Reinvestment</option>
+                                </select>
+                                <div
+                                    class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-5 text-slate-500">
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Amount Paid -->
+                        <div class="space-y-2 group">
+                            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1"
+                                data-i18n="labelAmountPaid">Amount Paid</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                                    <span class="text-slate-400 font-semibold">$</span>
+                                </div>
+                                <input type="number" step="0.01" name="Amount Paid" value="15000.00" required
+                                    class="w-full pl-9 pr-5 py-4 rounded-xl border border-slate-200 dark:border-slate-700 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 dark:focus:ring-brand-500/20 outline-none transition-all duration-200 text-slate-800 dark:text-white bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 font-mono hover:border-slate-300 dark:hover:border-slate-600">
+                            </div>
+                        </div>
+
+                        <!-- Amount Received -->
+                        <div class="space-y-2 group">
+                            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1"
+                                data-i18n="labelAmountReceived">Amount Received</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                                    <span class="text-slate-400 font-semibold">$</span>
+                                </div>
+                                <input type="number" step="0.01" name="Amount Received" value="15000.00" required
+                                    class="w-full pl-9 pr-5 py-4 rounded-xl border border-slate-200 dark:border-slate-700 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 dark:focus:ring-brand-500/20 outline-none transition-all duration-200 text-slate-800 dark:text-white bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 font-mono hover:border-slate-300 dark:hover:border-slate-600">
+                            </div>
+                        </div>
+
+                        <!-- Source Bank -->
+                        <div class="space-y-2 group">
+                            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1"
+                                data-i18n="labelSourceBank">Source Bank ID</label>
+                            <input type="number" name="From Bank" value="105"
+                                class="w-full px-5 py-4 rounded-xl border border-slate-200 dark:border-slate-700 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 dark:focus:ring-brand-500/20 outline-none transition-all duration-200 text-slate-800 dark:text-white bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 font-mono hover:border-slate-300 dark:hover:border-slate-600">
+                        </div>
+
+                        <!-- Dest Bank -->
+                        <div class="space-y-2 group">
+                            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1"
+                                data-i18n="labelDestBank">Dest Bank ID</label>
+                            <input type="number" name="To Bank" value="902"
+                                class="w-full px-5 py-4 rounded-xl border border-slate-200 dark:border-slate-700 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 dark:focus:ring-brand-500/20 outline-none transition-all duration-200 text-slate-800 dark:text-white bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 font-mono hover:border-slate-300 dark:hover:border-slate-600">
+                        </div>
+                    </div>
+
+                    <!-- Hidden Fields -->
+                    <input type="hidden" name="Account" value="X">
+                    <input type="hidden" name="Account.1" value="Y">
+                    <input type="hidden" name="Receiving Currency" value="USD">
+                    <input type="hidden" name="Payment Currency" value="USD">
+
+                    <button type="submit"
+                        class="w-full bg-gradient-to-r from-brand-700 to-brand-600 hover:from-brand-800 hover:to-brand-700 text-white font-bold py-5 rounded-2xl shadow-lg hover:shadow-xl transform transition-all hover:-translate-y-0.5 focus:ring-4 focus:ring-brand-500/30 mt-8 text-lg flex items-center justify-center gap-2">
+                        <span data-i18n="btnAnalyze">Analyze Transaction Risk</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </form>
+
+                <!-- Result Box -->
+                <div id="result" class="hidden">
+                    <!-- Results populated by JS -->
+                </div>
             </div>
+        </div>
+
+        <!-- ABOUT SECTION -->
+        <div id="about-section" class="w-full max-w-3xl glass-panel rounded-3xl overflow-hidden animate-fade-in hidden">
+            <div class="bg-slate-100 dark:bg-slate-800 p-8 sm:p-10 text-center relative">
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-white mb-2" data-i18n="aboutTitle">
+                    About the Project</h2>
+            </div>
+            <div class="p-8 sm:p-10 space-y-6 text-slate-600 dark:text-slate-300 text-lg leading-relaxed">
+                <p data-i18n="aboutP1">
+                    This advanced Anti-Money Laundering (AML) system leverages the power of <strong>XGBoost</strong> and
+                    <strong>Swarm Optimization</strong> to detect fraudulent financial patterns with high accuracy.
+                </p>
+                <p data-i18n="aboutP2">
+                    Designed for modern fintech infrastructure, it processes transaction data in real-time, analyzing
+                    variables like payment format, route, and frequency to assign risk scores immediately.
+                </p>
+                <div class="grid grid-cols-2 gap-4 mt-8">
+                    <div
+                        class="bg-white dark:bg-slate-700 p-4 rounded-xl border border-slate-200 dark:border-slate-600 text-center">
+                        <div class="text-2xl mb-2">⚡</div>
+                        <div class="font-bold text-slate-800 dark:text-white">Real-time</div>
+                    </div>
+                    <div
+                        class="bg-white dark:bg-slate-700 p-4 rounded-xl border border-slate-200 dark:border-slate-600 text-center">
+                        <div class="text-2xl mb-2">🧠</div>
+                        <div class="font-bold text-slate-800 dark:text-white">AI-Driven</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTACT SECTION -->
+        <div id="contact-section"
+            class="w-full max-w-xl glass-panel rounded-3xl overflow-hidden animate-fade-in hidden">
+            <div class="p-10 text-center">
+                <div
+                    class="w-24 h-24 bg-gradient-to-br from-brand-400 to-brand-600 rounded-full mx-auto mb-6 flex items-center justify-center text-4xl text-white shadow-lg">
+                    👨‍💻
+                </div>
+                <h2 class="text-3xl font-bold text-slate-800 dark:text-white mb-2" data-i18n="contactTitle">Contact
+                    Developer</h2>
+                <p class="text-slate-500 dark:text-slate-400 mb-8" data-i18n="contactSubtitle">Open for collaboration
+                    and questions</p>
+
+                <a href="https://github.com/aryan447" target="_blank"
+                    class="flex items-center justify-center gap-3 w-full bg-slate-900 dark:bg-black text-white font-bold py-4 rounded-xl hover:bg-slate-800 transition-all hover:scale-[1.02]">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                    </svg>
+                    <span data-i18n="githubBtn">View Profile on GitHub</span>
+                </a>
+
+                <div class="mt-6 text-sm text-slate-400">
+                    ID: aryan447
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <div class="fixed bottom-4 left-0 right-0 text-center text-slate-400 text-xs font-medium">
+        Powered by XGBoost & Swarm Optimization
     </div>
-</div>
 
-<script>
-document.getElementById('amlForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const resultDiv = document.getElementById('result');
-    resultDiv.style.display = 'none';
+    <!-- Logic Script -->
+    <script>
+        // --- Localization Data ---
+        const translations = {
+            en: {
+                appTitle: "AML Inspector",
+                navHome: "Home",
+                navAbout: "About",
+                navContact: "Contact",
+                heroTitle: "AML Transaction Inspector",
+                heroSubtitle: "AI-Powered Money Laundering Detection",
+                labelTimestamp: "Timestamp",
+                labelPaymentFormat: "Payment Format",
+                labelAmountPaid: "Amount Paid",
+                labelAmountReceived: "Amount Received",
+                labelSourceBank: "Source Bank ID",
+                labelDestBank: "Dest Bank ID",
+                optWire: "Wire Transfer",
+                optBitcoin: "Bitcoin / Crypto",
+                optCash: "Cash",
+                optCredit: "Credit Card",
+                optCheque: "Cheque",
+                optACH: "ACH",
+                optReinvest: "Reinvestment",
+                btnAnalyze: "Analyze Transaction Risk",
+                btnProcessing: "Processing Transaction...",
+                riskDetected: "Suspicious Activity Detected",
+                riskCleared: "Transaction Cleared",
+                riskTextSuspicious: "This transaction has been flagged for manual review.",
+                riskTextCleared: "No suspicious patterns were detected.",
+                riskScore: "Risk Score",
+                riskLevel: "Risk Level",
+                errorTitle: "Analysis Failed",
+                connErrorTitle: "Connection Error",
+                connErrorText: "Could not reach the analysis server. Is the backend running?",
+                aboutTitle: "About the Project",
+                aboutP1: "This advanced Anti-Money Laundering (AML) system leverages the power of <strong>XGBoost</strong> and <strong>Swarm Optimization</strong> to detect fraudulent financial patterns with high accuracy.",
+                aboutP2: "Designed for modern fintech infrastructure, it processes transaction data in real-time, analyzing variables like payment format, route, and frequency to assign risk scores immediately.",
+                contactTitle: "Contact Developer",
+                contactSubtitle: "Open for collaboration and questions",
+                githubBtn: "View Profile on GitHub"
+            },
+            hi: {
+                appTitle: "AML निरीक्षक",
+                navHome: "होम",
+                navAbout: "जानकारी",
+                navContact: "संपर्क",
+                heroTitle: "AML लेनदेन निरीक्षक",
+                heroSubtitle: "AI-संचालित मनी लॉन्ड्रिंग जांच",
+                labelTimestamp: "समय",
+                labelPaymentFormat: "भुगतान का प्रकार",
+                labelAmountPaid: "भुगतान की गई राशि",
+                labelAmountReceived: "प्राप्त राशि",
+                labelSourceBank: "स्रोत बैंक ID",
+                labelDestBank: "गंतव्य बैंक ID",
+                optWire: "वायर ट्रांसफर",
+                optBitcoin: "बिटकॉइन / क्रिप्टो",
+                optCash: "नकद",
+                optCredit: "क्रेडिट कार्ड",
+                optCheque: "चेक",
+                optACH: "ACH",
+                optReinvest: "पुनर्निवेश",
+                btnAnalyze: "लेनदेन जोखिम का विश्लेषण करें",
+                btnProcessing: "लेनदेन प्रोसेस हो रहा है...",
+                riskDetected: "संदिग्ध गतिविधि पाई गई",
+                riskCleared: "लेनदेन सुरक्षित है",
+                riskTextSuspicious: "इस लेनदेन को मैन्युअल समीक्षा के लिए चिह्नित किया गया है।",
+                riskTextCleared: "कोई संदिग्ध पैटर्न नहीं पाया गया।",
+                riskScore: "जोखिम स्कोर",
+                riskLevel: "जोखिम स्तर",
+                errorTitle: "विश्लेषण विफल",
+                connErrorTitle: "कनेक्शन त्रुटि",
+                connErrorText: "विश्लेषण सर्वर से संपर्क नहीं हो सका। क्या बैकएंड चल रहा है?",
+                aboutTitle: "परियोजना के बारे में",
+                aboutP1: "यह उन्नत एंटी-मनी लॉन्ड्रिंग (AML) सिस्टम <strong>XGBoost</strong> और <strong>Swarm Optimization</strong> की शक्ति का उपयोग करके उच्च सटीकता के साथ धोखाधड़ी वाले वित्तीय पैटर्न की पहचान करता है।",
+                aboutP2: "आधुनिक फिनटेक बुनियादी ढांचे के लिए डिज़ाइन किया गया, यह वास्तविक समय में लेनदेन डेटा को प्रोसेस करता है और जोखिम स्कोर तुरंत प्रदान करता है।",
+                contactTitle: "डेवलपर से संपर्क करें",
+                contactSubtitle: "सहयोग और प्रश्नों के लिए खुला",
+                githubBtn: "GitHub प्रोफाइल देखें"
+            }
+        };
 
-    // 1. Gather Data
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData.entries());
+        let currentLang = 'en';
 
-    // 2. Type Conversion (API expects numbers)
-    ['Amount Paid', 'Amount Received', 'From Bank', 'To Bank'].forEach(key => {
-        data[key] = parseFloat(data[key]);
-    });
+        function changeLanguage(lang) {
+            currentLang = lang;
+            const t = translations[lang];
 
-    try {
-        // 3. Send Request
-        const response = await fetch('/api/v1/predict', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-
-        const res = await response.json();
-
-        // 4. Show Result
-        resultDiv.style.display = 'block';
-        if (response.ok) {
-            const isFraud = res.is_laundering === 1;
-            resultDiv.className = `result-box ${isFraud ? 'danger' : 'safe'}`;
-            resultDiv.innerHTML = `
-                <h4 class="mb-2">${isFraud ? '🚨 SUSPICIOUS ACTIVITY DETECTED' : '✅ TRANSACTION CLEARED'}</h4>
-                <div class="d-flex justify-content-center gap-4 mt-3">
-                    <div><strong>Risk Score:</strong> ${(res.risk_score * 100).toFixed(2)}%</div>
-                    <div><strong>Level:</strong> ${res.risk_level}</div>
-                </div>
-            `;
-        } else {
-            resultDiv.className = 'result-box alert alert-warning';
-            resultDiv.innerHTML = `<strong>Error:</strong> ${res.detail || 'Unknown error occurred'}`;
+            // Text Elements
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (t[key]) {
+                    el.innerHTML = t[key];
+                }
+            });
         }
-    } catch (error) {
-        resultDiv.className = 'result-box alert alert-danger';
-        resultDiv.innerHTML = `<strong>Connection Failed:</strong> Is the API running?`;
-        console.error(error);
-    }
-});
-</script>
 
+        // --- Navigation Logic ---
+        function switchTab(tabId) {
+            // Hide all sections
+            ['home', 'about', 'contact'].forEach(id => {
+                document.getElementById(`${id}-section`).classList.add('hidden');
+            });
+            // Show target section
+            document.getElementById(`${tabId}-section`).classList.remove('hidden');
+
+            // Close mobile menu if open
+            document.getElementById('mobile-menu').classList.add('hidden');
+
+            // Update Active State on Desktop Nav Buttons
+            const buttons = document.querySelectorAll('.nav-item');
+            buttons.forEach(btn => {
+                if (btn.getAttribute('onclick').includes(tabId)) {
+                    btn.classList.add('text-brand-600', 'dark:text-brand-400');
+                    btn.classList.remove('text-slate-500', 'dark:text-slate-400');
+                } else {
+                    btn.classList.remove('text-brand-600', 'dark:text-brand-400');
+                    btn.classList.add('text-slate-500', 'dark:text-slate-400');
+                }
+            });
+
+            // Update Active State on Mobile Nav Buttons
+            const mobileButtons = document.querySelectorAll('.nav-item-mobile');
+            mobileButtons.forEach(btn => {
+                if (btn.getAttribute('onclick').includes(tabId)) {
+                    btn.classList.add('bg-slate-100', 'dark:bg-slate-800', 'text-brand-600', 'dark:text-brand-400');
+                    btn.classList.remove('text-slate-600', 'dark:text-slate-300');
+                } else {
+                    btn.classList.remove('bg-slate-100', 'dark:bg-slate-800', 'text-brand-600', 'dark:text-brand-400');
+                    btn.classList.add('text-slate-600', 'dark:text-slate-300');
+                }
+            });
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // --- Dark Mode Logic ---
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            const body = document.body;
+            const isDark = html.classList.toggle('dark');
+
+            // Toggle Background classes for body because of the gradient
+            if (isDark) {
+                body.classList.remove('light-bg');
+                body.classList.add('dark-bg');
+                document.getElementById('sunIcon').classList.remove('hidden');
+                document.getElementById('moonIcon').classList.add('hidden');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                body.classList.remove('dark-bg');
+                body.classList.add('light-bg');
+                document.getElementById('sunIcon').classList.add('hidden');
+                document.getElementById('moonIcon').classList.remove('hidden');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        // Initialize Theme
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            toggleDarkMode(); // Defaults to light, so toggle to dark
+        }
+
+        // --- Form Logic ---
+        document.getElementById('amlForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const resultDiv = document.getElementById('result');
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const t = translations[currentLang];
+
+            // Loading state
+            resultDiv.classList.add('hidden');
+            const originalBtnContent = submitBtn.innerHTML;
+
+            submitBtn.innerHTML = `
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                ${t.btnProcessing}
+            `;
+            submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+            submitBtn.disabled = true;
+
+            // 1. Gather Data
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+
+            // 2. Type Conversion
+            ['Amount Paid', 'Amount Received', 'From Bank', 'To Bank'].forEach(key => {
+                data[key] = parseFloat(data[key]);
+            });
+
+            try {
+                // 3. Send Request
+                const response = await fetch('/api/v1/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const res = await response.json();
+
+                // 4. Show Result
+                resultDiv.classList.remove('hidden');
+
+                if (response.ok) {
+                    const isFraud = res.is_laundering === 1;
+
+                    if (isFraud) {
+                        resultDiv.className = 'mt-8 p-6 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 animate-fade-in shadow-inner';
+                        resultDiv.innerHTML = `
+                            <div class="flex flex-col items-center text-center">
+                                <div class="w-20 h-20 bg-red-100 dark:bg-red-900/50 rounded-full flex items-center justify-center mb-5 text-4xl shadow-sm ring-4 ring-white dark:ring-slate-700">🚨</div>
+                                <h3 class="text-2xl font-bold text-red-900 dark:text-red-200 mb-2">${t.riskDetected}</h3>
+                                <p class="text-red-700/80 dark:text-red-300/80 mb-6 font-medium">${t.riskTextSuspicious}</p>
+                                <div class="grid grid-cols-2 gap-4 w-full max-w-sm">
+                                    <div class="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-red-100 dark:border-red-900">
+                                        <div class="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1">${t.riskScore}</div>
+                                        <div class="text-3xl font-extrabold text-red-600">${(res.risk_score * 100).toFixed(2)}<span class="text-lg">%</span></div>
+                                    </div>
+                                    <div class="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-red-100 dark:border-red-900">
+                                        <div class="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1">${t.riskLevel}</div>
+                                        <div class="text-3xl font-extrabold text-red-600">${res.risk_level}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        resultDiv.className = 'mt-8 p-6 rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 animate-fade-in shadow-inner';
+                        resultDiv.innerHTML = `
+                             <div class="flex flex-col items-center text-center">
+                                <div class="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/50 rounded-full flex items-center justify-center mb-5 text-4xl shadow-sm ring-4 ring-white dark:ring-slate-700">✅</div>
+                                <h3 class="text-2xl font-bold text-emerald-900 dark:text-emerald-200 mb-2">${t.riskCleared}</h3>
+                                <p class="text-emerald-700/80 dark:text-emerald-300/80 mb-6 font-medium">${t.riskTextCleared}</p>
+                                <div class="grid grid-cols-2 gap-4 w-full max-w-sm">
+                                    <div class="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-emerald-100 dark:border-emerald-900">
+                                        <div class="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1">${t.riskScore}</div>
+                                        <div class="text-3xl font-extrabold text-emerald-600">${(res.risk_score * 100).toFixed(2)}<span class="text-lg">%</span></div>
+                                    </div>
+                                    <div class="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-emerald-100 dark:border-emerald-900">
+                                        <div class="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1">${t.riskLevel}</div>
+                                        <div class="text-3xl font-extrabold text-emerald-600">${res.risk_level}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                } else {
+                    resultDiv.className = 'mt-8 p-6 rounded-2xl bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800 text-orange-800 dark:text-orange-200 animate-fade-in text-center';
+                    resultDiv.innerHTML = `
+                        <div class="text-4xl mb-3">⚠️</div>
+                        <h3 class="font-bold text-lg">${t.errorTitle}</h3>
+                        <p>${res.detail || 'Unknown error occurred'}</p>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.classList.remove('hidden');
+                resultDiv.className = 'mt-8 p-6 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 animate-fade-in text-center';
+                resultDiv.innerHTML = `
+                    <div class="text-4xl mb-3">🔌</div>
+                    <h3 class="font-bold text-lg">${t.connErrorTitle}</h3>
+                    <p>${t.connErrorText}</p>
+                `;
+                console.error(error);
+            } finally {
+                submitBtn.innerHTML = originalBtnContent;
+                submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
 </body>
+
 </html>

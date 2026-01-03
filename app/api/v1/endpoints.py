@@ -76,9 +76,9 @@ def predict_transaction(
             risk_level=calculate_risk_level(score)
         )
     except RuntimeError as e:
-        # Model not loaded
+        # Model not loaded or init failed
         logger.error(f"Model service error: {e}")
-        raise HTTPException(status_code=503, detail="Model service unavailable")
+        raise HTTPException(status_code=503, detail=str(e))
     except ValueError as e:
         # Invalid input data
         logger.warning(f"Invalid input data: {e}")

@@ -24,7 +24,13 @@ class ModelService:
         self.session: Optional[ort.InferenceSession] = None
         self.scaler_params: Optional[Dict] = None
         self.features: Optional[List[str]] = None
-        self._load_artifacts(model_dir)
+        self.init_error: Optional[str] = None
+        
+        try:
+            self._load_artifacts(model_dir)
+        except Exception as e:
+            logger.error(f"ModelService init failed: {e}")
+            self.init_error = str(e)
 
     def _load_artifacts(self, model_dir: str) -> None:
         """
@@ -72,6 +78,9 @@ class ModelService:
         """
         Predict risk scorer for a transaction dictionary.
         """
+        if self.init_error:
+            raise RuntimeError(f"Model service failed to initialize: {self.init_error}")
+            
         if not self.session or not self.scaler_params:
             raise RuntimeError("Model service not initialized.")
 

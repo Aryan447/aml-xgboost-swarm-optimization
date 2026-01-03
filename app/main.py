@@ -77,7 +77,11 @@ def health_check() -> dict:
     try:
         # Verify model service is available
         service = get_model_service()
-        model_status = "ready" if service.session is not None else "not_ready"
+        
+        if service.init_error:
+            model_status = f"error: {service.init_error}"
+        else:
+            model_status = "ready" if service.session is not None else "not_ready"
         
         return {
             "status": "ok",
