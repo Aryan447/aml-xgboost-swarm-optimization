@@ -27,4 +27,3 @@ scripts/
 models/
 models/*.json
 models/*.pkl
-
